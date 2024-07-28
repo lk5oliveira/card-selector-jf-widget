@@ -97,14 +97,14 @@
             // Remover colchetes de início e fim
             part = part.replace(/^{/, '').replace(/}$/, '');
 
-            // Dividir a string em chaves e valores
-            const parts = part.split(/\s*,\s*/);
+            // Dividir a string em chaves e valores considerando que os valores podem conter espaços e URLs
+            const parts = part.split(/,\s*(?=[^,]*:)/);
             
             // Criar o objeto resultante
             const obj = {};
             parts.forEach(p => {
-                const [key, value] = p.split(/\s*:\s*/);
-                obj[key.trim()] = value.trim();
+                const [key, ...value] = p.split(/\s*:\s*/);
+                obj[key.trim()] = value.join(':').trim();
             });
             
             return obj;
