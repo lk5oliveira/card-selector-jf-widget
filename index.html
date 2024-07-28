@@ -123,7 +123,8 @@
 </body>
 <script>
     JFCustomWidget.subscribe("ready", function(){
-        var label = JFCustomWidget.getWidgetSetting('options');
+        const options = JFCustomWidget.getWidgetSetting('options');
+        console.log(options);
         document.getElementById('labelText').innerHTML = label;
         //subscribe to form submit event
         JFCustomWidget.subscribe("submit", function(){
