@@ -17,7 +17,9 @@
         }
         .container {
             display: flex;
+            flex-wrap: wrap;
             gap: 20px;
+            justify-content: center;
         }
         .card-container {
             background-color: #fff;
@@ -28,6 +30,7 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             text-align: center;
             position: relative;
+            transition: border 0.3s ease;
         }
         .image-wrapper {
             border-radius: 10px;
@@ -62,11 +65,14 @@
             text-align: left;
         }
         .card-container input[type="radio"]:checked + .content {
-            border: 2px solid #4CAF50;
+            border: none;
         }
         .card-container input[type="radio"]:checked + .content .checkmark {
             background-color: #4CAF50;
             color: #fff;
+        }
+        .card-container input[type="radio"]:checked {
+            border: 2px solid #4CAF50;
         }
         .content {
             cursor: pointer;
