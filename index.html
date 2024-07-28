@@ -88,60 +88,97 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <input type="text" id="userInput" hidden>
-        <label class="card-container">
-            <input type="radio" name="multi-select" value="option1" class="radio-container">
-            <div class="content">
-                <div class="image-wrapper">
-                    <img src="https://via.placeholder.com/300x200.png?text=Card+1" alt="Invitation">
-                </div>
-                <div class="hover-box">
-                    <div class="checkmark">✔</div>
-                    <p>Option 1</p>
-                </div>
-                <div class="assistive-text">
-                    Assistive Text ideally should be here and should wrap 2 to 3 lines - the background box should grow based on the amount of lines that go into assistive text.
-                </div>
-            </div>
-        </label>
-        <label class="card-container">
-            <input type="radio" name="multi-select" value="option2" class="radio-container">
-            <div class="content">
-                <div class="image-wrapper">
-                    <img src="https://via.placeholder.com/300x200.png?text=Card+2" alt="Invitation">
-                </div>
-                <div class="hover-box">
-                    <div class="checkmark">✔</div>
-                    <p>Option 2</p>
-                </div>
-                <div class="assistive-text">
-                    Assistive Text ideally should be here and should wrap 2 to 3 lines - the background box should grow based on the amount of lines that go into assistive text.
-                </div>
-            </div>
-        </label>
-    </div>
+    <div class="container" id="cardContainer"></div>
 </body>
 <script>
+    function convertOptionsToObject(optionsString) {
+        // Dividir a string em partes individuais
+        const optionsArray = optionsString.split(/},\s*{/).map(part => {
+            // Remover colchetes de início e fim
+            part = part.replace(/^{/, '').replace(/}$/, '');
+
+            // Dividir a string em chaves e valores
+            const parts = part.split(/\s*,\s*/);
+            
+            // Criar o objeto resultante
+            const obj = {};
+            parts.forEach(p => {
+                const [key, value] = p.split(/\s*:\s*/);
+                obj[key.trim()] = value.trim();
+            });
+            
+            return obj;
+        });
+
+        return optionsArray;
+    }
+
+    function createCard(option) {
+        const label = document.createElement('label');
+        label.className = 'card-container';
+
+        const input = document.createElement('input');
+        input.type = 'radio';
+        input.name = 'multi-select';
+        input.value = option.option;
+        input.className = 'radio-container';
+
+        const content = document.createElement('div');
+        content.className = 'content';
+
+        const imageWrapper = document.createElement('div');
+        imageWrapper.className = 'image-wrapper';
+        const img = document.createElement('img');
+        img.src = option.image;
+        img.alt = option.description;
+        imageWrapper.appendChild(img);
+
+        const hoverBox = document.createElement('div');
+        hoverBox.className = 'hover-box';
+        const checkmark = document.createElement('div');
+        checkmark.className = 'checkmark';
+        checkmark.textContent = '✔';
+        const p = document.createElement('p');
+        p.textContent = option.option;
+        hoverBox.appendChild(checkmark);
+        hoverBox.appendChild(p);
+
+        const assistiveText = document.createElement('div');
+        assistiveText.className = 'assistive-text';
+        assistiveText.textContent = option.description;
+
+        content.appendChild(imageWrapper);
+        content.appendChild(hoverBox);
+        content.appendChild(assistiveText);
+
+        label.appendChild(input);
+        label.appendChild(content);
+
+        return label;
+    }
+
     JFCustomWidget.subscribe("ready", function(){
-        const options = JFCustomWidget.getWidgetSetting('options');
+        const optionsString = JFCustomWidget.getWidgetSetting('options');
+        const options = convertOptionsToObject(optionsString);
         console.log(options);
-        document.getElementById('labelText').innerHTML = label;
+
+        const cardContainer = document.getElementById('cardContainer');
+        options.forEach(option => {
+            const card = createCard(option);
+            cardContainer.appendChild(card);
+        });
+
         //subscribe to form submit event
         JFCustomWidget.subscribe("submit", function(){
             var msg = {
                 //you should valid attribute to data for JotForm
                 //to be able to use youw widget as required
                 valid: true,
-                value: document.getElementById('userInput').value
+                value: document.querySelector('input[name="multi-select"]:checked').value
             }
             // send value to JotForm
             JFCustomWidget.sendSubmit(msg);
         });
     });
-
-
-
-
 </script>
 </html>
