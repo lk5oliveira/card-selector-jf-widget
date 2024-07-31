@@ -171,7 +171,6 @@
     JFCustomWidget.subscribe("ready", function(){
         const optionsString = JFCustomWidget.getWidgetSetting('options');
         const options = convertOptionsToObject(optionsString);
-        resizeIframe();
 
         const cardContainer = document.getElementById('cardContainer');
         options.forEach(option => {
