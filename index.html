@@ -174,9 +174,10 @@
     JFCustomWidget.subscribe("ready", function(){
         const optionsString = JFCustomWidget.getWidgetSetting('options');
         const type = JFCustomWidget.getWidgetSetting('type');
+        console.log(type);
         const options = convertOptionsToObject(optionsString);
 
-        const inputType = type.toLowerCase() === 'single choice' ? 'radio' : 'checkbox';
+        const inputType = type === 'Single Choice' ? 'radio' : 'checkbox';
         const cardContainer = document.getElementById('cardContainer');
         options.forEach(option => {
             const card = createCard(option, inputType);
