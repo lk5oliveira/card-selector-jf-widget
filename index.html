@@ -65,14 +65,17 @@
             text-align: left;
             padding: 5px 5px 20px 5px;
         }
-        .card-container input[type="radio"]:checked + .card-container {
+        .card-container input[type="radio"]:checked + .card-container,
+        .card-container input[type="checkbox"]:checked + .card-container {
             border: 1px solid #4CAF50;
         }
-        .card-container input[type="radio"]:checked + .content .checkmark {
+        .card-container input[type="radio"]:checked + .content .checkmark,
+        .card-container input[type="checkbox"]:checked + .content .checkmark {
             background-color: #4CAF50;
             color: #fff;
         }
-        .card-container input[type="radio"]:checked {
+        .card-container input[type="radio"]:checked,
+        .card-container input[type="checkbox"]:checked {
             border: 2px solid #4CAF50;
         }
         .content {
@@ -120,12 +123,12 @@
         return optionsArray;
     }
 
-    function createCard(option) {
+    function createCard(option, inputType) {
         const label = document.createElement('label');
         label.className = 'card-container';
 
         const input = document.createElement('input');
-        input.type = 'radio';
+        input.type = inputType;
         input.name = 'multi-select';
         input.value = option.option;
         input.className = 'radio-container';
@@ -165,16 +168,18 @@
         JFCustomWidget.requestFrameResize({ height: document.querySelector('body').clientHeight });
     }
 
-    window.addEventListener('resize', resizeIframe());
+    window.addEventListener('resize', resizeIframe);
     
 
     JFCustomWidget.subscribe("ready", function(){
         const optionsString = JFCustomWidget.getWidgetSetting('options');
+        const type = JFCustomWidget.getWidgetSetting('type');
         const options = convertOptionsToObject(optionsString);
 
+        const inputType = type === 'single' ? 'radio' : 'checkbox';
         const cardContainer = document.getElementById('cardContainer');
         options.forEach(option => {
-            const card = createCard(option);
+            const card = createCard(option, inputType);
             cardContainer.appendChild(card);
         });
 
@@ -182,13 +187,11 @@
 
         //subscribe to form submit event
         JFCustomWidget.subscribe("submit", function(){
+            const selectedValues = Array.from(document.querySelectorAll('input[name="multi-select"]:checked')).map(input => input.value);
             var msg = {
-                //you should valid attribute to data for JotForm
-                //to be able to use youw widget as required
-                valid: true,
-                value: document.querySelector('input[name="multi-select"]:checked').value
-            }
-            // send value to JotForm
+                valid: selectedValues.length > 0,
+                value: selectedValues
+            };
             JFCustomWidget.sendSubmit(msg);
         });
     });
