@@ -161,10 +161,17 @@
         return label;
     }
 
+    function resizeIframe() {
+        JFCustomWidget.requestFrameResize({ height: document.querySelector('body').clientHeight });
+    }
+
+    window.addEventListener('resize', resizeIframe());
+    
+
     JFCustomWidget.subscribe("ready", function(){
         const optionsString = JFCustomWidget.getWidgetSetting('options');
         const options = convertOptionsToObject(optionsString);
-        console.log(options);
+        resizeIframe();
 
         const cardContainer = document.getElementById('cardContainer');
         options.forEach(option => {
