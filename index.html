@@ -10,9 +10,8 @@
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             display: flex;
-            justify-content: space;
+            justify-content: space-between;
             align-items: center;
-            height: 100vh;
             margin: 0;
         }
         .container {
@@ -36,10 +35,10 @@
         .image-wrapper {
             border-radius: 10px;
             overflow: hidden;
-        }
-        .image-wrapper img {
             width: 100%;
-            height: auto;
+            height: 200px; /* Altura fixa para manter a proporção */
+            background-size: cover;
+            background-position: center;
         }
         .hover-box {
             margin-top: 20px;
@@ -136,10 +135,7 @@
 
         const imageWrapper = document.createElement('div');
         imageWrapper.className = 'image-wrapper';
-        const img = document.createElement('img');
-        img.src = option.image;
-        img.alt = option.description;
-        imageWrapper.appendChild(img);
+        imageWrapper.style.backgroundImage = `url(${option.image})`;
 
         const hoverBox = document.createElement('div');
         hoverBox.className = 'hover-box';
