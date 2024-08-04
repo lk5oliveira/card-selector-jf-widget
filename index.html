@@ -172,7 +172,7 @@
 
     JFCustomWidget.subscribe("ready", function(){
         const optionsString = JFCustomWidget.getWidgetSetting('options');
-        const type = JFCustomWidget.getWidgetSetting('type');
+        const type = JFCustomWidget.getWidgetSetting('inputType');
         const options = convertOptionsToObject(optionsString);
         console.log(options,type);
 
