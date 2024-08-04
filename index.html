@@ -162,7 +162,7 @@
     }
 
     function resizeIframe() {
-        JFCustomWidget.requestFrameResize({ height: document.querySelector('body').clientHeight });
+        JFCustomWidget.requestFrameResize({ height: document.querySelector('body').clientHeight + 30});
     }
 
     window.addEventListener('resize', resizeIframe());
