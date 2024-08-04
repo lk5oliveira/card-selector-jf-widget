@@ -173,8 +173,8 @@
     JFCustomWidget.subscribe("ready", function(){
         const optionsString = JFCustomWidget.getWidgetSetting('options');
         const type = JFCustomWidget.getWidgetSetting('type');
-        console.log(options ,type);
         const options = convertOptionsToObject(optionsString);
+        console.log(options,type);
 
         const cardContainer = document.getElementById('cardContainer');
         options.forEach(option => {
