@@ -65,14 +65,14 @@
             text-align: left;
             padding: 5px 5px 20px 5px;
         }
-        .card-container input[type="radio"]:checked + .card-container {
+        .card-container input[type="radio"]:checked + .card-container, card-container input[type="checkbox"]:checked + .card-container {
             border: 1px solid #4CAF50;
         }
-        .card-container input[type="radio"]:checked + .content .checkmark {
+        .card-container input[type="radio"]:checked + .content .checkmark, .card-container input[type="checkbox"]:checked + .content .checkmark {
             background-color: #4CAF50;
             color: #fff;
         }
-        .card-container input[type="radio"]:checked {
+        .card-container input[type="radio"]:checked, .card-container input[type="checkbox"]:checked {
             border: 2px solid #4CAF50;
         }
         .content {
