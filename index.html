@@ -96,27 +96,20 @@
 </head>
 <body>
     <div class="container" id="cardContainer"></div>
+    <input type="hidden" id="selectedValues" name="selectedValues">
 </body>
 <script>
     function convertOptionsToObject(optionsString) {
-        // Dividir a string em partes individuais
         const optionsArray = optionsString.split(/},\s*{/).map(part => {
-            // Remover colchetes de início e fim
             part = part.replace(/^{/, '').replace(/}$/, '');
-
-            // Dividir a string em chaves e valores considerando que os valores podem conter espaços e URLs
             const parts = part.split(/,\s*(?=[^,]*:)/);
-            
-            // Criar o objeto resultante
             const obj = {};
             parts.forEach(p => {
                 const [key, ...value] = p.split(/\s*:\s*/);
                 obj[key.trim()] = value.join(':').trim();
             });
-            
             return obj;
         });
-
         return optionsArray;
     }
 
@@ -124,13 +117,14 @@
         const label = document.createElement('label');
         label.className = 'card-container';
 
-        const inputType = type == "Single choice" ? "radio" : "checkbox";
+        const inputType = type === "Single Choice" ? "radio" : "checkbox";
 
         const input = document.createElement('input');
         input.type = inputType;
         input.name = 'multi-select';
         input.value = option.option;
         input.className = 'radio-container';
+        input.addEventListener('change', updateHiddenInput);
 
         const content = document.createElement('div');
         content.className = 'content';
@@ -163,18 +157,24 @@
         return label;
     }
 
+    function updateHiddenInput() {
+        const selectedValues = Array.from(document.querySelectorAll('input[name="multi-select"]:checked'))
+            .map(input => input.value)
+            .join(',');
+        document.getElementById('selectedValues').value = selectedValues;
+    }
+
     function resizeIframe() {
         JFCustomWidget.requestFrameResize({ height: document.querySelector('body').clientHeight + 30});
     }
 
-    window.addEventListener('resize', resizeIframe());
+    window.addEventListener('resize', resizeIframe);
     
-
     JFCustomWidget.subscribe("ready", function(){
         const optionsString = JFCustomWidget.getWidgetSetting('options');
         const type = JFCustomWidget.getWidgetSetting('inputType');
         const options = convertOptionsToObject(optionsString);
-        console.log(options,type);
+        console.log(options, type);
 
         const cardContainer = document.getElementById('cardContainer');
         options.forEach(option => {
@@ -184,15 +184,11 @@
 
         resizeIframe();
 
-        //subscribe to form submit event
         JFCustomWidget.subscribe("submit", function(){
             var msg = {
-                //you should valid attribute to data for JotForm
-                //to be able to use youw widget as required
                 valid: true,
-                value: document.querySelector('input[name="multi-select"]:checked').value
+                value: document.getElementById('selectedValues').value
             }
-            // send value to JotForm
             JFCustomWidget.sendSubmit(msg);
         });
     });
