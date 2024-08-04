@@ -84,9 +84,9 @@
         .checkmark {
             width: 20px;
             height: 20px;
-            border: 1px solid #4CAF50;
+            border: 1px solid #e1e1e1;
             border-radius: 50%;
-            color: #4CAF50;
+            color: #e1e1e1;
             text-align: center;
             line-height: 20px;
             margin-right: 10px;
@@ -176,7 +176,7 @@
 
         const cardContainer = document.getElementById('cardContainer');
         options.forEach(option => {
-            const card = createCard(option);
+            const card = createCard(option, type);
             cardContainer.appendChild(card);
         });
 
