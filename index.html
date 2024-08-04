@@ -120,12 +120,14 @@
         return optionsArray;
     }
 
-    function createCard(option) {
+    function createCard(option, type) {
         const label = document.createElement('label');
         label.className = 'card-container';
 
+        const inputType = type == "Single choice" ? "radio" : "checkbox";
+
         const input = document.createElement('input');
-        input.type = 'radio';
+        input.type = inputType;
         input.name = 'multi-select';
         input.value = option.option;
         input.className = 'radio-container';
