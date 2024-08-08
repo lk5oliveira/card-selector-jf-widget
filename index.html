@@ -290,6 +290,7 @@
 
             document.getElementById('houseNumber').addEventListener('input', function() {
                 updateUserInput();
+                console.log("listening: " + msg);
                 JFCustomWidget.sendData({
                     value: msg
                 });
