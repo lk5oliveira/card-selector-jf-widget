@@ -3,317 +3,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Address Search</title>
     <script src="//js.jotform.com/JotFormCustomWidget.min.js"></script>
-
+    <title>Multi-select Hover</title>
     <style>
         body {
-            margin: 0px;
-        }
-        .pac-container::after {
-            display: none !important;
-        }
-
-        #container {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
             display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        input {
-            flex: 1;
-            --rem: 16;
-            list-style: none;
-            box-sizing: border-box;
-            outline: 0;
+            justify-content: space-between;
+            align-items: center;
             margin: 0;
-            text-align: left;
-            padding: 0 .625em;
-            height: 2.5em;
-            min-height: 2.5em;
-            color: #2c3345;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            width: 100%;
+        }
+        .card-container {
             background-color: #fff;
-            font-size: 1em;
-            border-radius: 4px;
-            display: block;
-            font-family: inherit;
-            border: 1px solid #f23a3c;
-            border-width: 1px;
-            border-color: rgb(184, 189, 201);
-            min-width: 100%;
-            max-width: 100%;
-            width: 310px;
+            border: 1px solid #e1e1e1;
+            border-radius: 10px;
+            padding: 0px;
+            flex-basis: 28%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            position: relative;
+            transition: border 0.3s ease;
         }
-
-        input:read-only {
-            background-color: #f3f3f3;
+        .image-wrapper {
+            border-radius: 10px;
+            overflow: hidden;
+            width: 100%;
+            height: 200px; /* Altura fixa para manter a proporção */
+            background-size: cover;
+            background-position: center;
         }
-
-        label {
-            margin: 12px 0px 3px 0px;
+        .hover-box {
+            margin-top: 20px;
+            border: 1px solid #e1e1e1;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: left;
+            display: flex;
+            align-items: center;
         }
-
-        .hidden {
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
+        .hover-box p {
+            margin: 0;
+            padding: 0;
+            color: #333;
+            flex-grow: 1;
         }
-
-        .fade-in {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .error-border {
-            border: 1px solid red;
-        }
-
-        .error-message {
-            color: red;
-            font-size: 12px;
+        .radio-container {
             display: none;
         }
-
-        .show {
-            display: block;
+        .assistive-text {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+            text-align: left;
+            padding: 5px 5px 20px 5px;
         }
-
-        #clearButton {
-            position: absolute;
-            right: 10px;
-            top: 8px;
-            background: none;
-            border: none;
-            font-size: 20px;
+        .card-container input[type="radio"]:checked + .card-container, card-container input[type="checkbox"]:checked + .card-container {
+            border: 1px solid #4CAF50;
+        }
+        .card-container input[type="radio"]:checked + .content .checkmark, .card-container input[type="checkbox"]:checked + .content .checkmark {
+            background-color: #4CAF50;
+            color: #fff;
+        }
+        .card-container input[type="radio"]:checked, .card-container input[type="checkbox"]:checked {
+            border: 2px solid #4CAF50;
+        }
+        .content {
             cursor: pointer;
-            background: #ebebeb;
-            border-radius: 50%;
+            padding: 15px;
+            border-radius: 10px;
+            transition: border 0.3s ease;
         }
-
+        .checkmark {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #e1e1e1;
+            border-radius: 50%;
+            color: #e1e1e1;
+            text-align: center;
+            line-height: 20px;
+            margin-right: 10px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
     </style>
 </head>
 <body>
-    <div id="container">
-        <input type="text" id="addressInput" placeholder="Enter your address">
-        <button id="clearButton">&times;</button>
-        <label for="streetName" id="streetNameLabel" class="hidden">Street Name:</label>
-        <input type="text" id="streetName" name="streetName" class="hidden" readonly>
-        <label for="houseNumber" id="houseNumberLabel" class="hidden">House Number:</label>
-        <input type="text" id="houseNumber" name="houseNumber" class="hidden" readonly>
-        <div id="houseNumberError" class="error-message">House number is required</div>
-        <label for="city" id="cityLabel" class="hidden">City:</label>
-        <input type="text" id="city" name="city" class="hidden" readonly>
-        <label for="state" id="stateLabel" class="hidden">State:</label>
-        <input type="text" id="state" name="state" class="hidden" readonly>
-        <label for="postalCode" id="postalCodeLabel" class="hidden">Postal Code:</label>
-        <input type="text" id="postalCode" name="postalCode" class="hidden" readonly>
-        <input type="hidden" id="userInput" name="userInput">
-    </div>
-
-    <script>
-        function initAutocomplete() {
-            const input = document.getElementById('addressInput');
-            const options = {
-                types: ['address'],
-                componentRestrictions: { country: 'AU' }, // Limit to Australia
-                suppressDefaultUI: true // Remove Google logo from dropdown
-            };
-
-            const autocomplete = new google.maps.places.Autocomplete(input, options);
-
-            // Define the geographical bounds for New South Wales
-            const bounds = new google.maps.LatLngBounds(
-                new google.maps.LatLng(-37.505, 140.999), // Southwest coordinate
-                new google.maps.LatLng(-28.157, 153.638)  // Northeast coordinate
-            );
-
-            // Apply the bounds to the Autocomplete
-            autocomplete.setBounds(bounds);
-            autocomplete.setOptions({ strictBounds: true });
-
-            autocomplete.addListener('place_changed', function () {
-                const place = autocomplete.getPlace();
-                if (!place.geometry) {
-                    console.error("No details available for input: '" + place.name + "'");
-                    return;
-                }
-
-                if (!bounds.contains(place.geometry.location)) {
-                    console.error("Selected place is not within the specified bounds of New South Wales.");
-                    return;
-                }
-
-                // Clear the form fields
-                document.getElementById('streetName').value = '';
-                document.getElementById('houseNumber').value = '';
-                document.getElementById('city').value = '';
-                document.getElementById('state').value = '';
-                document.getElementById('postalCode').value = '';
-
-                // Fill the form fields with the address components
-                place.address_components.forEach(function (component) {
-                    const types = component.types;
-                    if (types.includes('route')) {
-                        document.getElementById('streetName').value = component.long_name;
-                    } else if (types.includes('street_number')) {
-                        document.getElementById('houseNumber').value = component.long_name;
-                    } else if (types.includes('locality') || types.includes('sublocality') || types.includes('neighborhood')) {
-                        document.getElementById('city').value = component.long_name;
-                    } else if (types.includes('administrative_area_level_1')) {
-                        document.getElementById('state').value = component.long_name;
-                    } else if (types.includes('postal_code')) {
-                        document.getElementById('postalCode').value = component.long_name;
-                    }
-                });
-
-                // Show the address fields with fade-in animation
-                document.getElementById('streetNameLabel').classList.add('fade-in');
-                document.getElementById('streetName').classList.add('fade-in');
-                document.getElementById('houseNumberLabel').classList.add('fade-in');
-                document.getElementById('houseNumber').classList.add('fade-in');
-                document.getElementById('cityLabel').classList.add('fade-in');
-                document.getElementById('city').classList.add('fade-in');
-                document.getElementById('stateLabel').classList.add('fade-in');
-                document.getElementById('state').classList.add('fade-in');
-                document.getElementById('postalCodeLabel').classList.add('fade-in');
-                document.getElementById('postalCode').classList.add('fade-in');
-
-
-                let container = document.getElementById('container');
-                let containerHeight = window.getComputedStyle(container).height
-                JFCustomWidget.requestFrameResize({ height: parseInt(containerHeight) +  10 });
-
-                updateUserInput();
+    <div class="container" id="cardContainer"></div>
+    <input type="hidden" id="selectedValues" name="selectedValues">
+</body>
+<script>
+    function convertOptionsToObject(optionsString) {
+        const optionsArray = optionsString.split(/},\s*{/).map(part => {
+            part = part.replace(/^{/, '').replace(/}$/, '');
+            const parts = part.split(/,\s*(?=[^,]*:)/);
+            const obj = {};
+            parts.forEach(p => {
+                const [key, ...value] = p.split(/\s*:\s*/);
+                obj[key.trim()] = value.join(':').trim();
             });
-        }
-
-        function updateUserInput() {
-            const userInput = [
-                document.getElementById('streetName').value,
-                document.getElementById('houseNumber').value,
-                document.getElementById('city').value,
-                document.getElementById('state').value,
-                document.getElementById('postalCode').value
-            ].filter(value => value.trim() !== '').join(', ');
-            console.log('address updated');
-
-            document.getElementById('userInput').value = userInput;
-            validateForm();
-        }
-
-        function validateForm() {
-            let houseNumber = document.getElementById('houseNumber').value;
-            let addressValue = document.getElementById('userInput').value;
-            if (!houseNumber) {
-                document.getElementById('houseNumber').classList.add('error-border');
-                document.getElementById('houseNumberError').classList.add('show');
-                console.log('not valid');
-                return false;
-            } else {
-                document.getElementById('houseNumber').classList.remove('error-border');
-                document.getElementById('houseNumberError').classList.remove('show');
-                JFCustomWidget.sendData(addressValue = document.getElementById('userInput').value);
-                return true;
-            }
-        }
-
-        function clearFields() {
-            document.getElementById('addressInput').value = '';
-            document.getElementById('streetName').value = '';
-            document.getElementById('houseNumber').value = '';
-            document.getElementById('city').value = '';
-            document.getElementById('state').value = '';
-            document.getElementById('postalCode').value = '';
-
-            document.getElementById('streetNameLabel').classList.remove('fade-in');
-            document.getElementById('streetName').classList.remove('fade-in');
-            document.getElementById('houseNumberLabel').classList.remove('fade-in');
-            document.getElementById('houseNumber').classList.remove('fade-in');
-            document.getElementById('cityLabel').classList.remove('fade-in');
-            document.getElementById('city').classList.remove('fade-in');
-            document.getElementById('stateLabel').classList.remove('fade-in');
-            document.getElementById('state').classList.remove('fade-in');
-            document.getElementById('postalCodeLabel').classList.remove('fade-in');
-            document.getElementById('postalCode').classList.remove('fade-in');
-
-            document.getElementById('houseNumber').classList.remove('error-border');
-            document.getElementById('houseNumberError').classList.remove('show');
-
-            document.getElementById('userInput').value = '';
-            validateForm();
-        }
-
-        document.getElementById('clearButton').addEventListener('click', clearFields);
-
-        // Always subscribe to the ready event and implement widget related code
-        // inside the callback function, it is the best practice while developing widgets
-        JFCustomWidget.subscribe("ready", function(response){
-            // Define your API key variable here
-            let apiKey = JFCustomWidget.getWidgetSetting('apiKey');
-            console.log(response);
-            // Function to handle dropdown appearance
-            function handleDropdownAppearance() {
-                let dropDown = document.getElementsByClassName('pac-container')[0];
-                let observer = new MutationObserver(function(mutations) {
-                    mutations.forEach(function(mutation) {
-                        if (mutation.attributeName === 'style') {
-                            let dropDownDisplay = window.getComputedStyle(dropDown).display;
-                            if (dropDownDisplay !== 'none') {
-                                let dropdownHeight = window.getComputedStyle(dropDown).height;
-                                JFCustomWidget.requestFrameResize({ height: parseInt(dropdownHeight) + 60 });
-                                // Disconnect the observer once the dropdown appears
-                                observer.disconnect();
-                            } else {
-                                JFCustomWidget.requestFrameResize({ height: parseInt(45) });
-                            }
-                        }
-                    });
-                });
-                // Start observing changes to the dropdown
-                observer.observe(dropDown, { attributes: true });
-            }
-
-            // Add event listener for input on the address field
-            document.getElementById('addressInput').addEventListener('input', function() {
-                // Call function to handle dropdown appearance
-                handleDropdownAppearance();
-            });
-
-            document.getElementById('houseNumber').addEventListener('input', function() {
-                updateUserInput();
-            });
-
-            window.addEventListener('blur', function(event) {
-                if(document.querySelectorAll('.fade-in').length == 0) {
-                    JFCustomWidget.requestFrameResize({ height: parseInt(45) });
-                }
-            });
-
-            document.addEventListener('click', function(event) {
-                if(document.querySelectorAll('.fade-in').length == 0) {
-                    JFCustomWidget.requestFrameResize({ height: parseInt(45) });
-                }
-            });
-
-            // Dynamically create the script tag for Google Maps API
-            let script = document.createElement("script");
-            script.src = "https://maps.googleapis.com/maps/api/js?key=" + apiKey + "&libraries=places&callback=initAutocomplete";
-            script.async = true;
-            document.head.appendChild(script);
+            return obj;
         });
+        return optionsArray;
+    }
+
+    function createCard(option, type) {
+        const label = document.createElement('label');
+        label.className = 'card-container';
+
+        const inputType = type === "Single Choice" ? "radio" : "checkbox";
+
+        const input = document.createElement('input');
+        input.type = inputType;
+        input.name = 'multi-select';
+        input.value = option.option;
+        input.className = 'radio-container';
+        input.addEventListener('change', updateHiddenInput); // Adiciona evento de mudança
+
+        const content = document.createElement('div');
+        content.className = 'content';
+
+        const imageWrapper = document.createElement('div');
+        imageWrapper.className = 'image-wrapper';
+        imageWrapper.style.backgroundImage = `url(${option.image})`;
+
+        const hoverBox = document.createElement('div');
+        hoverBox.className = 'hover-box';
+        const checkmark = document.createElement('div');
+        checkmark.className = 'checkmark';
+        checkmark.textContent = '✔';
+        const p = document.createElement('p');
+        p.textContent = option.option;
+        hoverBox.appendChild(checkmark);
+        hoverBox.appendChild(p);
+
+        const assistiveText = document.createElement('div');
+        assistiveText.className = 'assistive-text';
+        assistiveText.textContent = option.description;
+
+        content.appendChild(imageWrapper);
+        content.appendChild(hoverBox);
+        content.appendChild(assistiveText);
+
+        label.appendChild(input);
+        label.appendChild(content);
+
+        return label;
+    }
+
+    function updateHiddenInput() {
+        // Coleta todos os inputs selecionados e junta seus valores em uma string separada por vírgulas
+        const selectedValues = Array.from(document.querySelectorAll('input[name="multi-select"]:checked'))
+            .map(input => input.value)
+            .join(',');
+        // Atualiza o valor do input hidden
+        document.getElementById('selectedValues').value = selectedValues;
+
+        // Envia os dados atualizados para o JotForm
+        JFCustomWidget.sendData({
+            value: selectedValues
+        });
+    }
+
+    function resizeIframe() {
+        JFCustomWidget.requestFrameResize({ height: document.querySelector('body').clientHeight + 30});
+    }
+
+    window.addEventListener('resize', resizeIframe);
+    
+    JFCustomWidget.subscribe("ready", function(){
+        const optionsString = JFCustomWidget.getWidgetSetting('options');
+        const type = JFCustomWidget.getWidgetSetting('inputType');
+        const options = convertOptionsToObject(optionsString);
+        console.log(options, type);
+
+        const cardContainer = document.getElementById('cardContainer');
+        options.forEach(option => {
+            const card = createCard(option, type);
+            cardContainer.appendChild(card);
+        });
+
+        resizeIframe();
 
         JFCustomWidget.subscribe("submit", function(){
-    
-            let msg = {
+            var msg = {
                 valid: true,
-                value: addressValue = document.getElementById('userInput').value
+                value: document.getElementById('selectedValues').value // Usa o valor do input hidden
             }
-            
-            if(validateForm()) {
-                JFCustomWidget.sendSubmit(msg);
-            }
+            JFCustomWidget.sendSubmit(msg);
         });
-
-    </script>
-</body>
+    });
+</script>
 </html>
